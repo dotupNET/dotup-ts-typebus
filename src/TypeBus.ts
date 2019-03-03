@@ -1,24 +1,28 @@
+import { ILogger, LoggerFactory } from 'dotup-ts-logger';
 import { Observable, Subject, Subscription } from 'rxjs';
+// tslint:disable-next-line: no-submodule-imports
 import { filter, map } from 'rxjs/operators';
-import { IKeyMessage } from './IKeyMessage';
-import { ILogger, LoggerFactory } from "dotup-ts-logger";
 import { IBus } from './IBus';
+import { IKeyMessage } from './IKeyMessage';
 
-export class TypeBus implements IBus{
-  private subjectBus: Subject<any>;
-  private logger: ILogger;
+export class TypeBus implements IBus {
+  // tslint:disable-next-line: no-any
+  private readonly subjectBus: Subject<any>;
+  private readonly logger: ILogger;
   // private chanels: Channel;
 
   constructor() {
-    this.logger = new LoggerFactory().CreateLogger('TypeBus')
-    this.logger.call('constructor');
+    this.logger = LoggerFactory.createLogger('TypeBus');
+    this.logger.CallInfo('constructor');
+    // tslint:disable-next-line: no-any
     this.subjectBus = new Subject<any>();
   }
 
   async publishAsync<T>(message: T): Promise<void> {
-    let x = 0;
     // const channel = (<any>message.constructor).name;
-    this.logger.debug(`message <${(<any>message.constructor).name}> published`);
+    // tslint:disable-next-line: no-any
+    this.logger.Debug(`message <${(<any>message.constructor).name}> published`);
+
     return new Promise<void>((resolve, reject) => {
       try {
         this.subjectBus.next(message);
@@ -41,39 +45,47 @@ export class TypeBus implements IBus{
     });
   }
 
-  subscribe<T>(messageType: { new(...args: any[]): T }, handler: (data: T) => void): Subscription {
-    const channel = (<any>messageType).name;
-    this.logger.debug(`new subscrition for ${channel}`, 'subscribe');
+  // tslint:disable-next-line: no-any
+  subscribe<T>(messageType: new (...args: any[]) => T, handler: (data: T) => void): Subscription {
+    // tslint:disable-next-line: no-any
+    const channel = messageType.constructor.name;
+    this.logger.Debug(`new subscrition for ${channel}`, 'subscribe');
     const result = this.subjectBus.pipe(
       filter(m => {
-        const mtype = (<any>m.constructor).name;
+        // tslint:disable-next-line: no-unsafe-any
+        const mtype = m.constructor.name;
+
         return mtype === channel;
       })
     );
-    return result.subscribe(data => handler(data));
+
+    return result.subscribe(handler);
   }
 
   subscribeKey<T>(messageType: string, handler: (data: T) => void): Subscription {
-    this.logger.debug(`new subscrition for key ${messageType}`, 'subscribeKey');
+    this.logger.Debug(`new subscrition for key ${messageType}`, 'subscribeKey');
     const result = this.subjectBus.pipe(
       filter(value => {
-        const asKeyMessage = value as IKeyMessage<T>;
+        const asKeyMessage = <IKeyMessage<T>>value;
         if (asKeyMessage === null) {
           return false;
         }
 
         return asKeyMessage.key === messageType;
       }),
-      map(m => (m as IKeyMessage<T>).message)
+      map(m => (<IKeyMessage<T>>m).message)
     );
-    return result.subscribe(data => handler(data));
+
+    return result.subscribe(handler);
   }
 
-  asObservable<T>(messageType: { new(...args: any[]): T }): Observable<T> {
-    const typeName = (<any>messageType).name;
-    const result = this.subjectBus.pipe<T>(
-      filter(m => (<any>m.constructor).name === typeName)
+  // tslint:disable-next-line: no-any
+  asObservable<T>(messageType: new (...args: any[]) => T): Observable<T> {
+    // tslint:disable-next-line: no-any : no-unsafe-any
+    const typeName = (<any>messageType).constructor.name;
+
+    return this.subjectBus.pipe<T>(
+      filter<T>(m => m.constructor.name === typeName)
     );
-    return result;
   }
 }

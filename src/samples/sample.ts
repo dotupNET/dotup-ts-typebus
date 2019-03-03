@@ -1,12 +1,12 @@
-import { LoggerFactory, LoggerManager, ConsoleLogWriter } from "dotup-ts-logger";
-import { TypeBus } from "../TypeBus";
-import { Message1, Message2 } from "../spec/SampleMessages";
-import { PublisherSubscriber } from "../PublisherSubscriber";
+import { ConsoleLogWriter, LoggerFactory, LoggerManager } from 'dotup-ts-logger';
+import { PublisherSubscriber } from '../PublisherSubscriber';
+import { Message1, Message2 } from './SampleMessages';
 
 export class Startup {
 
   private bus: PublisherSubscriber;
 
+  // tslint:disable-next-line: max-func-body-length
   async testMessageBus() {
 
     console.log(new Date());
@@ -14,15 +14,15 @@ export class Startup {
     console.log(new Date());
 
     const pubsub = new PublisherSubscriber();
-    pubsub.subscribe("abc.#.ghi", msg => {
+    pubsub.subscribe('abc.#.ghi', msg => {
       console.log({ _id: 1, counter: pubsub.messageCounter, msg: msg });
     });
-    pubsub.subscribe("abc.#.ghi", async msg => {
-      console.log ('delayed');
+    pubsub.subscribe('abc.#.ghi', async msg => {
+      console.log('delayed');
       await this.delay(1000);
       console.log({ _id: 2, counter: pubsub.messageCounter, msg: msg });
     });
-    pubsub.subscribe("abc.#.ghi", msg => {
+    pubsub.subscribe('abc.#.ghi', msg => {
       console.log({ _id: 3, counter: pubsub.messageCounter, msg: msg });
     });
 
@@ -36,16 +36,17 @@ export class Startup {
     //  pubsub.publish('true pub3', 'abc.def.ghi');
     //  pubsub.publish('true pub4', 'abc.def.123.ghi');
 
-    console.log("pub 1");
-     pubsub.publish('false pub1', 'abc');
-    console.log("pub 2");
-     pubsub.publish('false pub2', 'abc.def');
-    console.log("pub 3");
-     pubsub.publish('true pub3', 'abc.def.ghi');
-    console.log("pub 4");
-     pubsub.publish('true pub4', 'abc.def.123.ghi');
+    console.log('pub 1');
+    pubsub.publish('false pub1', 'abc');
+    console.log('pub 2');
+    pubsub.publish('false pub2', 'abc.def');
+    console.log('pub 3');
+    pubsub.publish('true pub3', 'abc.def.ghi');
+    console.log('pub 4');
+    pubsub.publish('true pub4', 'abc.def.123.ghi');
 
     await this.delay(5000);
+
     return;
 
     // const channel1 = "abc";
@@ -54,7 +55,6 @@ export class Startup {
     // const channel4 = "abc.#.ghi";
     // const channel5 = "abc.def.*";
     // const channel6 = "abc.def.#";
-
 
     // const isOk11 = pubsub.topicMatches('abc', channel1);
     // const isOk12 = pubsub.topicMatches('abc.def', channel1);
@@ -94,7 +94,7 @@ export class Startup {
     // const isOk64 = pubsub.topicMatches('abc.def.ghi.jkl', channel6);
     // const isOk65 = pubsub.topicMatches('aabc', channel6);
 
-    const f = new LoggerFactory();
+    const f = LoggerFactory;
     const m = new LoggerManager();
     m.AttachLogWriter(new ConsoleLogWriter());
     this.bus = new PublisherSubscriber();
@@ -109,9 +109,10 @@ export class Startup {
       console.log(`1 as Message1 - ${data.payload}`);
     });
 
-    this.bus.asObservable(Message2).subscribe(o => {
-      console.log('2: ' + o.value);
-    });
+    this.bus.asObservable(Message2)
+      .subscribe(o => {
+        console.log(`2: ${o.value}`);
+      });
 
     await this.bus.publishAsync(new Message1('CHA1', 'OHA'));
     // this.bus.publishKey('aa', 1);
@@ -122,7 +123,8 @@ export class Startup {
     const all = Promise.all([
       this.send1(),
       this.send2()
-    ]).catch(error => console.log(error.message));
+    ])
+      .catch(error => console.log(error));
     console.log('all pusblished');
     await all;
     console.log('all done');
@@ -146,10 +148,12 @@ export class Startup {
   }
 
   async delay(ms: number): Promise<void> {
-    return new Promise<void>(resolve => setTimeout(() => resolve(), ms));
+    // tslint:disable-next-line: no-string-based-set-timeout
+    return new Promise<void>(resolve => setTimeout(resolve, ms));
   }
 
 }
 
 const startup = new Startup();
+// tslint:disable-next-line: no-floating-promises
 startup.testMessageBus();

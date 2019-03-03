@@ -1,8 +1,11 @@
 test/
 coverage/
+secrets/
 src/
-src/spec/*
-src/samples/*
+src/sample.ts
+src/spec/
+dist/spec/
+dist/sample.*
 spec/
 docs/
 scripts/
@@ -14,3 +17,4 @@ scripts/
 .nyc_output
 tsconfig.json
 tslint.json
+gruntfile.js

@@ -1,38 +1,46 @@
+import { ILogger, LoggerFactory } from 'dotup-ts-logger';
 import { Observable, Subject, Subscription } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { ILogger, LoggerFactory } from "dotup-ts-logger";
+// tslint:disable-next-line: no-submodule-imports
+import { filter } from 'rxjs/operators';
 import { IBus } from './IBus';
 
 class TopicMessage<T> {
   topic: string;
   message: T;
   timestamp = new Date();
- // id = new Uuid
+  // id = new Uuid
 }
 
 export class PublisherSubscriber implements IBus {
-  private subjectBus: Subject<any>;
-  private logger: ILogger;
+  // tslint:disable-next-line: no-any
+  private readonly subjectBus: Subject<any>;
+  private readonly logger: ILogger;
   // private chanels: Channel;
 
   messageCounter: number = 0;
 
   constructor() {
-    this.logger = new LoggerFactory().CreateLogger('PublisherSubscriber')
-    this.logger.call('constructor');
+    this.logger = LoggerFactory.createLogger('PublisherSubscriber');
+    this.logger.CallInfo('constructor');
+    // tslint:disable-next-line: no-any
     this.subjectBus = new Subject<any>();
   }
 
-  publish<T>(message: T, topic: string | null = null): void {
+  publish<T>(message: T, topic?: string): void {
     const msg = new TopicMessage();
-    msg.topic = topic || (<any>message.constructor).name;
+    if (topic === undefined) {
+      msg.topic = message.constructor.name;
+    } else {
+      msg.topic = topic;
+
+    }
     msg.message = message;
-    this.messageCounter++;
+    this.messageCounter += 1;
     this.subjectBus.next(msg);
-    this.logger.debug(`message <${msg.topic}> published`);
+    this.logger.Debug(`message <${msg.topic}> published`);
   }
 
-  async publishAsync<T>(message: T, topic: string | null = null): Promise<void> {
+  async publishAsync<T>(message: T, topic?: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       try {
         this.publish(message, topic);
@@ -43,34 +51,46 @@ export class PublisherSubscriber implements IBus {
     });
   }
 
-  subscribe<T>(topic: { new(...args: any[]): T } | string, handler: (data: T) => void): Subscription {
+  // tslint:disable-next-line: no-any
+  subscribe<T>(topic: (new (...args: any[]) => T) | string, handler: (data: T) => void): Subscription {
     const result = this.asObservable(topic);
-    return result.subscribe(data => handler(data));
+
+    return result.subscribe(handler);
   }
 
-  subscribeAsync<T>(topic: { new(...args: any[]): T } | string, handler: (data: T) => Promise<void>): Subscription {
+  // tslint:disable-next-line: no-any
+  subscribeAsync<T>(topic: (new (...args: any[]) => T) | string, handler: (data: T) => Promise<void>): Subscription {
     const result = this.asObservable(topic);
-    return result.subscribe(data => handler(data));
+
+    return result.subscribe(handler);
   }
 
-  asObservable<T>(topic: { new(...args: any[]): T } | string): Observable<T> {
-    const t: string = typeof (topic) === 'string' ? topic : (<any>topic).name;
-    this.logger.debug(`new subscrition for ${topic}`, 'subscribe');
-    const result = this.subjectBus.pipe(
-      filter(m => {
-        const msg = m as TopicMessage<T>;
-        return this.topicMatches(msg.topic, t);
-      })
-    );
-    return result;
+  // tslint:disable-next-line: no-any
+  asObservable<T>(topic: (new (...args: any[]) => T) | string): Observable<T> {
+    // tslint:disable-next-line: no-any : no-unsafe-any
+    const t: string = typeof (topic) === 'string' ? topic : (<any>topic).constructor.name;
+    this.logger.Debug(`new subscrition for ${topic}`, 'subscribe');
+
+    return this.subjectBus
+      .pipe(
+        filter(m => {
+          const msg = <TopicMessage<T>>m;
+
+          return this.topicMatches(msg.topic, t);
+        })
+      );
+
   }
 
   topicMatches(value: string, topic: string): boolean {
     if (value === topic) {
       return true;
     }
-    var regexString = '^' + topic.replace(/\*/g, '([^.]+)').replace(/#/g, '([^.]+\.?)+') + '$';
+    // tslint:disable-next-line: prefer-template
+    const regexString = '^' + topic.replace(/\*/g, '([^.]+)')
+      .replace(/#/g, '([^.]+\.?)+') + '$';
+
     return value.search(regexString) !== -1;
-  };
+  }
 
 }

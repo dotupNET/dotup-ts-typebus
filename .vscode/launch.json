@@ -5,20 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "chrome",
-      "request": "launch",
-      "name": "Launch Chrome against localhost",
-      "url": "http://localhost:8080",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceFolder}/dist/samples/sample.js",
+      "program": "${workspaceFolder}/src/LocalSkillServer.ts",
       "outFiles": [
         "${workspaceFolder}/dist/*.js"
-      ]
+      ],
+      "sourceMaps": true
     },
     {
       "type": "node",
@@ -30,6 +24,41 @@
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Current TS File",
+      "type": "node",
+      "request": "launch",
+      "args": [
+        "${relativeFile}"
+      ],
+      "runtimeArgs": [
+        "--nolazy",
+        "-r",
+        "ts-node/register"
+      ],
+      "stopOnEntry": false,
+      "sourceMaps": true,
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+    },
+    {
+      "name": "Current JS File",
+      "type": "node",
+      "request": "launch",
+      "program": "${file}",
+      "stopOnEntry": false,
+      "args": [],
+      "cwd": "${fileDirname}",
+      "runtimeExecutable": null,
+      "runtimeArgs": [
+        "--nolazy"
+      ],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "internalConsole",
+      "sourceMaps": false
     }
   ]
 }

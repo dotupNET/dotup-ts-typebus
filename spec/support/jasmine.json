@@ -1,5 +1,5 @@
 {
-  "spec_dir": "./src",
+  "spec_dir": "./spec",
   "spec_files": [
     "**/*[sS]pec.ts"
   ],
@@ -7,5 +7,6 @@
     "helpers/**/*.ts"
   ],
   "stopSpecOnExpectationFailure": false,
-  "random": true
+  "random": false,
+  "oneFailurePerSpec": false
 }
