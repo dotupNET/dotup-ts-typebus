@@ -1,0 +1,16 @@
+test/
+coverage/
+src/
+src/spec/*
+src/samples/*
+spec/
+docs/
+scripts/
+.vscode
+.gitignore
+.npmignore
+.travis.yml
+.idea
+.nyc_output
+tsconfig.json
+tslint.json

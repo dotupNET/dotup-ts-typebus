@@ -1,0 +1,50 @@
+{
+  "name": "dotup-ts-typebus",
+  "version": "0.0.14",
+  "description": "small typed message bus",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "release": "npm run test && git push && npm run gh-pages && npm publish",
+    "clean-dist": "rimraf dist",
+    "build": "rimraf dist && tsc",
+    "test": "jasmine-ts",
+    "docs": "typedoc --mode file --out docs src --exclude \"**/*+(index|.spec|.e2e).ts\"",
+    "gh-pages": "rimraf docs && npm run docs && gh-pages -d docs",
+    "ci": "npm run build",
+    "postversion": "git push && git push --tags",
+    "prepublishOnly": "npm run ci",
+    "preversion": "npm run ci"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dotupNET/dotup-ts-typebus.git"
+  },
+  "keywords": [
+    "typescript",
+    "library",
+    "template"
+  ],
+  "author": "Peter Ullrich",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dotupNET/dotup-ts-typebus/issues"
+  },
+  "homepage": "https://github.com/dotupNET/dotup-ts-typebus#readme",
+  "devDependencies": {
+    "@types/jasmine": "^3.3.9",
+    "dotup-ts-logger": "0.0.13",
+    "gh-pages": "^2.0.1",
+    "jasmine": "^3.3.1",
+    "jasmine-ts": "^0.3.0",
+    "rimraf": "^2.6.3",
+    "rxjs": "^5.5.12",
+    "ts-node": "^8.0.2",
+    "typedoc": "^0.14.2",
+    "typescript": "^3.3.3"
+  },
+  "peerDependencies": {
+    "dotup-ts-logger": "^0.0.13",
+    "rxjs": "^5.5.12"
+  }
+}
