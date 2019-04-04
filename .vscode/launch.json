@@ -8,9 +8,9 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceFolder}/src/LocalSkillServer.ts",
+      "program": "${workspaceFolder}/src/samples/sample2.ts",
       "outFiles": [
-        "${workspaceFolder}/dist/*.js"
+        "${workspaceFolder}/dist/**/*.js"
       ],
       "sourceMaps": true
     },

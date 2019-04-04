@@ -1,8 +1,8 @@
 // tslint:disable: newline-per-chained-call
 import { ConsoleLogWriter, ILogger, LoggerFactory, LoggerManager, LogLevel } from 'dotup-ts-logger';
 import { Subscription } from 'rxjs';
-import { Message1, Message2 } from '../src/samples/SampleMessages';
-import { TypeBus } from '../src/TypeBus';
+import { BusMessage, ReactiveBus, TopicMatcher } from '../src/index';
+import { Message1 } from '../src/samples/SampleMessages';
 
 describe('TypeBus', () => {
 
@@ -19,42 +19,35 @@ describe('TypeBus', () => {
   });
 
   it('should create an instance', () => {
-    const bus = new TypeBus();
+    const bus = new ReactiveBus(new TopicMatcher('/'));
     expect(bus).toBeTruthy();
   });
 
   it('should return subscription', () => {
-    const bus = new TypeBus();
-    const result = bus.subscribe(TypeBus, data => { });
+    const bus = new ReactiveBus(new TopicMatcher('/'));
+    const result = bus.subscribe(ReactiveBus, data => { });
     expect(result instanceof Subscription).toBeTruthy();
     result.unsubscribe();
   });
 
   it('should receive message 1', async () => {
-    const bus = new TypeBus();
-    const result = bus.subscribe(Message1, data => {
-      expect(data instanceof Message1).toBeTruthy();
+    const bus = new ReactiveBus(new TopicMatcher('/'));
+    const result = bus.subscribe(Message1, msg => {
+      expect(msg instanceof BusMessage).toBeTruthy();
+      expect(msg.payload instanceof Message1).toBeTruthy();
     });
     const m1 = new Message1('CH', 'PAY');
     await bus.publishAsync(m1);
     result.unsubscribe();
   });
 
-  it('should receive by key', async () => {
-    const bus = new TypeBus();
-    const result = bus.subscribeKey('BONGO', data => {
-      expect(data).toEqual('JO');
-    });
-    const m1 = new Message1('CH', 'PAY');
-    await bus.publishKey('BONGO', 'JO');
-    result.unsubscribe();
-  });
-
   it('should receive as observable', async () => {
-    const bus = new TypeBus();
+    const bus = new ReactiveBus(new TopicMatcher('/'));
     const observable = bus.asObservable(Message1);
     const subscription = observable.subscribe(data => {
-      expect(data).toEqual(new Message1('CH', 'PAY'));
+      const msg = new BusMessage<Message1>('Message1');
+      msg.payload = new Message1('CH', 'PAY');
+      expect(data).toEqual(msg);
     });
     const m1 = new Message1('CH', 'PAY');
     await bus.publishAsync(m1);
